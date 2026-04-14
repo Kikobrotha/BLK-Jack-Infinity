@@ -1,279 +1,105 @@
 'use client';
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import CardGrid from '../components/CardGrid';
-import ConfidenceMeter from '../components/ConfidenceMeter';
-import { getRecommendationFromSimulation, RecommendationAction } from '../lib/recommendation';
-import { Card } from '../lib/shoe';
-import {
-  cardTokenClass,
-  DEFAULT_ACTION,
-  DEFAULT_LEAN_LABEL,
-  DEFAULT_PROBABILITIES,
-  DEFAULT_REASON,
-  formatEV,
-  formatLean,
-  formatProbability,
-  getLayoutClasses,
-  getSessionResultStats,
-  layoutOptions,
-  LayoutPreset,
-  mapEvBySide,
-  resolveRoundResult,
-  toEvPercent,
-} from '../lib/pageModel';
-import { BaccaratResult } from '../lib/baccarat';
+import { useMemo, useState } from 'react';
+import CardPicker from '@/components/blackjack/CardPicker';
+import ModeSelector from '@/components/blackjack/ModeSelector';
+import { getBlackjackAdvice } from '@/lib/blackjack/advisor';
+import { getRuleset } from '@/lib/blackjack/rules';
+import { BlackjackMode, CardRank } from '@/lib/blackjack/types';
 
-function useIsSmallScreen() {
-  return useSyncExternalStore(
-    callback => {
-      if (typeof window === 'undefined') {
-        return () => {};
-      }
-
-      const media = window.matchMedia('(max-width: 767px)');
-      media.addEventListener('change', callback);
-      return () => media.removeEventListener('change', callback);
-    },
-    () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false),
-    () => false,
-  );
-}
+const DEALER_UPCARDS: CardRank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
 export default function Home() {
-  const [playerCards, setPlayerCards] = useState<Card[]>([]);
-  const [bankerCards, setBankerCards] = useState<Card[]>([]);
+  const [mode, setMode] = useState<BlackjackMode>('regular');
+  const [playerCards, setPlayerCards] = useState<CardRank[]>(['10', '6']);
+  const [dealerUpcard, setDealerUpcard] = useState<CardRank>('10');
 
-  const [results, setResults] = useState<BaccaratResult[]>([]);
-  const [usedCards, setUsedCards] = useState<Card[]>([]);
-  const [sessionHands, setSessionHands] = useState(0);
-
-  const [actionLabel, setActionLabel] = useState<RecommendationAction>(DEFAULT_ACTION);
-  const [bestLean, setBestLean] = useState(DEFAULT_LEAN_LABEL);
-
-  const [ev, setEv] = useState(0);
-  const [confidence, setConfidence] = useState(0);
-  const [advisorReason, setAdvisorReason] = useState(DEFAULT_REASON);
-  const [predictionProbabilities, setPredictionProbabilities] = useState(DEFAULT_PROBABILITIES);
-  const [evBySide, setEvBySide] = useState(DEFAULT_PROBABILITIES);
-
-  const [skipCount, setSkipCount] = useState(0);
-  const [selectedLayout, setSelectedLayout] = useState<LayoutPreset>(() => {
-    if (typeof window === 'undefined') return 'classic';
-
-    const saved = localStorage.getItem('baccarat-ui-layout') as LayoutPreset | null;
-    if (saved && layoutOptions.some(option => option.value === saved)) {
-      return saved;
-    }
-
-    return 'classic';
-  });
-  const isSmallScreen = useIsSmallScreen();
-
-  useEffect(() => {
-    localStorage.setItem('baccarat-ui-layout', selectedLayout);
-  }, [selectedLayout]);
-
-  const activeLayout =
-    selectedLayout === 'auto' ? (isSmallScreen ? 'mobile-stacked' : 'classic') : selectedLayout;
-
-  const isCompact = activeLayout === 'compact';
-
-  const layoutClasses = useMemo(() => getLayoutClasses(activeLayout), [activeLayout]);
-
-  function handleDone() {
-    if (playerCards.length === 0 || bankerCards.length === 0) return;
-
-    const outcome = resolveRoundResult(playerCards, bankerCards);
-    const handCards = [...playerCards, ...bankerCards];
-    const allUsedCards = [...usedCards, ...handCards];
-    const totalHands = results.length + 1;
-
-    setResults(prev => [...prev, outcome]);
-    setUsedCards(allUsedCards);
-    setSessionHands(prev => prev + 1);
-
-    const recommendationData = getRecommendationFromSimulation(allUsedCards, totalHands);
-
-    setActionLabel(recommendationData.action);
-    setBestLean(formatLean(recommendationData.bestLean));
-    setAdvisorReason(recommendationData.reason);
-    setConfidence(recommendationData.confidence);
-    setEv(toEvPercent(recommendationData.bestEV));
-    setPredictionProbabilities(recommendationData.probabilities);
-    setEvBySide(mapEvBySide(recommendationData.options));
-
-    if (recommendationData.action === 'DO NOT PLAY') {
-      setSkipCount(prev => prev + 1);
-    }
-
-    setPlayerCards([]);
-    setBankerCards([]);
-  }
-
-  function resetShoe() {
-    setResults([]);
-    setSessionHands(0);
-    setActionLabel(DEFAULT_ACTION);
-    setBestLean(DEFAULT_LEAN_LABEL);
-    setConfidence(0);
-    setEv(0);
-    setAdvisorReason(DEFAULT_REASON);
-    setSkipCount(0);
-    setPlayerCards([]);
-    setBankerCards([]);
-    setUsedCards([]);
-    setPredictionProbabilities(DEFAULT_PROBABILITIES);
-    setEvBySide(DEFAULT_PROBABILITIES);
-  }
-
-  const metricRows = [
-    {
-      label: 'Player',
-      probability: predictionProbabilities.player,
-      expectedValue: evBySide.player,
-      colorClass: 'text-blue-200',
-    },
-    {
-      label: 'Banker',
-      probability: predictionProbabilities.banker,
-      expectedValue: evBySide.banker,
-      colorClass: 'text-red-200',
-    },
-    {
-      label: 'Tie',
-      probability: predictionProbabilities.tie,
-      expectedValue: evBySide.tie,
-      colorClass: 'text-purple-200',
-    },
-  ];
-
-  const sessionResultStats = useMemo(() => getSessionResultStats(results), [results]);
-
-  const panelBase = isCompact
-    ? 'rounded-xl bg-green-800/75 p-3 shadow-lg shadow-black/20 backdrop-blur-sm'
-    : 'rounded-2xl bg-green-800/75 p-4 md:p-5 shadow-xl shadow-black/25 backdrop-blur-sm';
+  const ruleset = useMemo(() => getRuleset(mode), [mode]);
+  const advice = useMemo(() => getBlackjackAdvice(mode, playerCards, dealerUpcard), [mode, playerCards, dealerUpcard]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-green-950 via-green-900 to-green-950 text-white p-4 md:p-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-4 md:mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Baccarat Decision Assistant</h1>
-            <p className="text-green-100/75 text-sm mt-1">Statistical recommendation interface</p>
-          </div>
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+        <header className="rounded-xl border border-slate-800 bg-slate-900/80 p-6">
+          <h1 className="text-2xl font-bold text-white">Blackjack Decision Assistant</h1>
+          <p className="mt-2 text-sm text-slate-300">
+            Mode-based blackjack guidance for human play. This tool gives strategy advice and explanations, not autoplay.
+          </p>
+        </header>
 
-          <div className="w-full md:w-auto">
-            <label htmlFor="layoutPreset" className="mb-1.5 block text-xs uppercase tracking-wide text-green-100/70">
-              Layout Preset
+        <section className="grid gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 md:grid-cols-2">
+          <ModeSelector value={mode} onChange={setMode} />
+
+          <div className="space-y-2">
+            <label htmlFor="dealer-upcard" className="text-sm font-medium text-slate-200">
+              Dealer Upcard
             </label>
             <select
-              id="layoutPreset"
-              value={selectedLayout}
-              onChange={e => setSelectedLayout(e.target.value as LayoutPreset)}
-              className="w-full md:min-w-56 rounded-lg border border-white/20 bg-green-900/80 px-3 py-2 text-sm font-medium shadow-md outline-none transition focus:border-yellow-300 focus:ring-2 focus:ring-yellow-300/40"
+              id="dealer-upcard"
+              value={dealerUpcard}
+              onChange={event => setDealerUpcard(event.target.value as CardRank)}
+              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
             >
-              {layoutOptions.map(option => (
-                <option key={option.value} value={option.value} className="text-white bg-green-950">
-                  {option.label}
+              {DEALER_UPCARDS.map(upcard => (
+                <option key={upcard} value={upcard}>
+                  {upcard}
                 </option>
               ))}
             </select>
           </div>
-        </div>
+        </section>
 
-        <div className={`${layoutClasses.grid} transition-all duration-300`}>
-          <section className={`${panelBase} ${layoutClasses.player} transition-all duration-300`}>
-            <h2 className={`${isCompact ? 'text-lg' : 'text-xl'} font-semibold mb-3`}>Player Cards</h2>
-            <CardGrid disabled={false} compact={isCompact} onSelect={(c: Card) => setPlayerCards(p => [...p, c])} />
-            <div className="mt-3 text-sm min-h-8">
-              {playerCards.map((c, i) => (
-                <span key={i} className={cardTokenClass(isCompact)}>
-                  {c}
-                </span>
-              ))}
+        <CardPicker
+          title="Player Hand"
+          cards={playerCards}
+          onAddCard={rank => setPlayerCards(current => [...current, rank])}
+          onUndoCard={() => setPlayerCards(current => current.slice(0, -1))}
+        />
+
+        <section className="rounded-xl border border-emerald-700/40 bg-emerald-900/15 p-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-full bg-emerald-600/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+              Recommended Action
+            </span>
+            <span className="text-2xl font-bold text-emerald-300">{advice.primaryAction}</span>
+            {advice.fallbackAction ? (
+              <span className="text-sm text-slate-300">Fallback: {advice.fallbackAction}</span>
+            ) : null}
+          </div>
+
+          <p className="mt-3 text-sm text-slate-200">{advice.rationale}</p>
+
+          <dl className="mt-4 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
+            <div>
+              <dt className="text-slate-400">Player Total</dt>
+              <dd className="font-semibold text-white">{advice.handValue.total}</dd>
             </div>
-          </section>
-
-          <section
-            className={`${isCompact ? 'rounded-xl p-3' : 'rounded-2xl p-4 md:p-6'} bg-black/70 text-center shadow-2xl shadow-black/30 ${layoutClasses.center} ${layoutClasses.centerShell} transition-all duration-300`}
-          >
-            <div className="text-xs md:text-sm uppercase tracking-[0.18em] text-green-100/75 mb-2">Best statistical lean</div>
-            <div className="text-3xl md:text-4xl font-bold text-yellow-300 drop-shadow-sm tracking-wide">{bestLean}</div>
-
-            <div className="mt-3 text-xs md:text-sm uppercase tracking-[0.18em] text-green-100/75">Action</div>
-            <div
-              className={`text-2xl md:text-3xl font-extrabold mt-1 ${
-                actionLabel === 'PLAY' ? 'text-green-300' : actionLabel === 'CAUTIOUS' ? 'text-amber-300' : 'text-red-300'
-              }`}
-            >
-              {actionLabel}
+            <div>
+              <dt className="text-slate-400">Hand Type</dt>
+              <dd className="font-semibold text-white">{advice.handValue.isSoft ? 'Soft' : 'Hard'}</dd>
             </div>
-
-            <div className="text-sm mt-2 text-green-100/95">
-              Lean EV: <span className="font-semibold text-yellow-200">{ev}%</span>
+            <div>
+              <dt className="text-slate-400">Blackjack</dt>
+              <dd className="font-semibold text-white">{advice.handValue.isBlackjack ? 'Yes' : 'No'}</dd>
             </div>
-            <div className="text-xs mt-2 text-green-100/80">{advisorReason}</div>
-
-            <div className="mt-3 text-sm font-medium text-green-100">Confidence: {confidence}%</div>
-            <ConfidenceMeter value={confidence} compact={isCompact} />
-
-            <div className="mt-4 rounded-xl border border-white/15 bg-green-950/45 p-3 text-left">
-              <div className="mb-2 text-[11px] md:text-xs uppercase tracking-[0.14em] text-green-100/75">
-                Probabilities & EV (next hand)
-              </div>
-              <div className="space-y-1.5">
-                {metricRows.map(row => (
-                  <div
-                    key={row.label}
-                    className="grid grid-cols-[1.1fr_1fr_1fr] items-center rounded-md bg-black/25 px-2.5 py-2 text-xs md:text-sm"
-                  >
-                    <span className={`font-semibold ${row.colorClass}`}>{row.label}</span>
-                    <span className="text-green-100/90">P: {formatProbability(row.probability)}</span>
-                    <span className="text-yellow-100">EV: {formatEV(row.expectedValue)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 text-[11px] md:text-xs text-green-100/70">
-                Displayed lean: <span className="font-semibold text-yellow-200">{bestLean}</span>
-              </div>
+            <div>
+              <dt className="text-slate-400">Bust</dt>
+              <dd className="font-semibold text-white">{advice.handValue.isBust ? 'Yes' : 'No'}</dd>
             </div>
+          </dl>
+        </section>
 
-            <button
-              onClick={handleDone}
-              className={`mt-5 w-full bg-yellow-300 text-black font-extrabold rounded-xl shadow-lg shadow-yellow-400/25 hover:bg-yellow-200 active:scale-[0.99] transition ${activeLayout === 'mobile-stacked' ? 'py-4 text-xl' : isCompact ? 'py-2.5 text-base' : 'py-3.5 text-lg'}`}
-            >
-              DONE
-            </button>
-
-            <button
-              onClick={resetShoe}
-              className="mt-3 text-sm text-red-200 hover:text-red-100 underline underline-offset-4 transition"
-            >
-              Reset Shoe
-            </button>
-
-            <div className="mt-4 pt-3 border-t border-white/10 text-[11px] md:text-xs text-green-100/80 space-y-1">
-              <div>Session hands recorded: <span className="font-medium">{sessionHands}</span></div>
-              <div>Player results: <span className="font-medium">{sessionResultStats.player}</span></div>
-              <div>Banker results: <span className="font-medium">{sessionResultStats.banker}</span></div>
-              <div>Tie results: <span className="font-medium">{sessionResultStats.tie}</span></div>
-              <div>Skipped bad spots: <span className="font-medium">{skipCount}</span></div>
-            </div>
-          </section>
-
-          <section className={`${panelBase} ${layoutClasses.banker} transition-all duration-300`}>
-            <h2 className={`${isCompact ? 'text-lg' : 'text-xl'} font-semibold mb-3`}>Banker Cards</h2>
-            <CardGrid disabled={false} compact={isCompact} onSelect={(c: Card) => setBankerCards(b => [...b, c])} />
-            <div className="mt-3 text-sm min-h-8">
-              {bankerCards.map((c, i) => (
-                <span key={i} className={cardTokenClass(isCompact)}>
-                  {c}
-                </span>
-              ))}
-            </div>
-          </section>
-        </div>
+        <section className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+          <h2 className="text-lg font-semibold text-white">Mode Rules Snapshot</h2>
+          <ul className="mt-3 space-y-1 text-sm text-slate-300">
+            <li>Mode: {ruleset.label}</li>
+            <li>Decks: {ruleset.decks}</li>
+            <li>Dealer Hits Soft 17: {ruleset.dealerHitsSoft17 ? 'Yes' : 'No'}</li>
+            <li>Double After Split: {ruleset.doubleAfterSplit ? 'Yes' : 'No'}</li>
+            <li>Surrender Allowed: {ruleset.surrender ? 'Yes' : 'No'}</li>
+            <li>Blackjack Payout: {ruleset.blackjackPayout}</li>
+          </ul>
+        </section>
       </div>
     </main>
   );
