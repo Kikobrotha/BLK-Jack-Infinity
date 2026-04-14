@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Blackjack Decision Assistant',
-  description: 'Mode-aware blackjack assistant for Regular and Infinity blackjack strategy guidance.',
+  title: 'Blackjack Assistant',
+  description: 'Starter shell for a blackjack assistant built with Next.js App Router.',
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">{children}</body>
     </html>
   );
 }
