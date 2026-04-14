@@ -241,6 +241,20 @@ export default function Home() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   }
 
+  const sessionResultStats = useMemo(
+    () =>
+      results.reduce(
+        (acc, result) => {
+          if (result === 'Player') acc.player += 1;
+          if (result === 'Banker') acc.banker += 1;
+          if (result === 'Tie') acc.tie += 1;
+          return acc;
+        },
+        { player: 0, banker: 0, tie: 0 },
+      ),
+    [results],
+  );
+
   const panelBase = isCompact
     ? 'rounded-xl bg-green-800/75 p-3 shadow-lg shadow-black/20 backdrop-blur-sm'
     : 'rounded-2xl bg-green-800/75 p-4 md:p-5 shadow-xl shadow-black/25 backdrop-blur-sm';
@@ -341,6 +355,9 @@ export default function Home() {
 
             <div className="mt-4 pt-3 border-t border-white/10 text-[11px] md:text-xs text-green-100/80 space-y-1">
               <div>Session hands recorded: <span className="font-medium">{sessionHands}</span></div>
+              <div>Player results: <span className="font-medium">{sessionResultStats.player}</span></div>
+              <div>Banker results: <span className="font-medium">{sessionResultStats.banker}</span></div>
+              <div>Tie results: <span className="font-medium">{sessionResultStats.tie}</span></div>
               <div>Skipped bad spots: <span className="font-medium">{skipCount}</span></div>
             </div>
           </section>
