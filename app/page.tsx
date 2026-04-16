@@ -5,11 +5,13 @@ import { AppShell } from '@/components/AppShell';
 import CardPicker from '@/components/blackjack/CardPicker';
 import { InfoPanel } from '@/components/InfoPanel';
 import { ModeSelector } from '@/components/ModeSelector';
+import { evaluateHand } from '@/lib/blackjack/handEvaluator';
 import { BLACKJACK_MODE_MAP, BLACKJACK_MODES } from '@/lib/blackjack/modes';
 import type { CardRank } from '@/lib/blackjack/types';
 import { DEFAULT_MODE } from '@/lib/modes';
 
 const MAX_PLAYER_CARDS = 6;
+const MAX_EXPOSED_CARDS = 20;
 
 function addCardWithCap(cards: CardRank[], rank: CardRank, maxCards: number): CardRank[] {
   if (cards.length >= maxCards) {
@@ -26,8 +28,12 @@ export default function HomePage() {
   const [selectedMode, setSelectedMode] = useState(DEFAULT_MODE);
   const [playerCards, setPlayerCards] = useState<CardRank[]>([]);
   const [dealerUpcard, setDealerUpcard] = useState<CardRank[]>([]);
+  const [exposedCards, setExposedCards] = useState<CardRank[]>([]);
 
   const selectedModeConfig = useMemo(() => BLACKJACK_MODE_MAP[selectedMode], [selectedMode]);
+  const playerHandValue = useMemo(() => evaluateHand(playerCards), [playerCards]);
+  const playerSoftHardLabel = playerCards.length === 0 ? '—' : playerHandValue.isSoft ? 'Soft' : 'Hard';
+  const playerPairLabel = playerCards.length < 2 ? 'N/A (need 2 cards)' : playerHandValue.canSplit ? 'Pair' : 'Not a pair';
 
   return (
     <AppShell
@@ -66,9 +72,12 @@ export default function HomePage() {
           <p className="text-sm text-slate-300">
             Cards entered: <span className="font-medium text-slate-100">{playerCards.length}</span>
           </p>
-          <p className="mt-1 text-sm text-slate-400">Hand total: —</p>
-          <p className="mt-1 text-sm text-slate-400">Soft / hard status: —</p>
-          <p className="mt-1 text-xs text-slate-500">Evaluation logic will be connected in a later iteration.</p>
+          <p className="mt-1 text-sm text-slate-400">Hand total: {playerHandValue.total}</p>
+          <p className="mt-1 text-sm text-slate-400">Soft / hard status: {playerSoftHardLabel}</p>
+          <p className="mt-1 text-sm text-slate-400">Pair status: {playerPairLabel}</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Blackjack: {playerHandValue.isBlackjack ? 'Yes' : 'No'} · Bust: {playerHandValue.isBust ? 'Yes' : 'No'}
+          </p>
         </InfoPanel>
 
         <CardPicker
@@ -85,6 +94,26 @@ export default function HomePage() {
             <span className="font-medium text-slate-100">{dealerUpcard.length ? dealerUpcard[0] : 'None'}</span>
           </p>
           <p className="mt-1 text-xs text-slate-500">Dealer hand resolution is intentionally not implemented yet.</p>
+        </InfoPanel>
+
+        <CardPicker
+          title="Seen / Exposed Cards (Optional)"
+          cards={exposedCards}
+          onAddCard={rank => setExposedCards(prev => addCardWithCap(prev, rank, MAX_EXPOSED_CARDS))}
+          onUndoCard={() => setExposedCards(prev => removeLastCard(prev))}
+          maxCards={MAX_EXPOSED_CARDS}
+        />
+
+        <InfoPanel
+          title="Seen Cards Panel"
+          description="Visible cards for counting context (input only; no counting engine yet)."
+        >
+          <p className="text-sm text-slate-300">
+            Exposed cards entered: <span className="font-medium text-slate-100">{exposedCards.length}</span>
+          </p>
+          <p className="mt-1 text-sm text-slate-400 break-words">
+            Cards: {exposedCards.length ? exposedCards.join(' · ') : 'None'}
+          </p>
         </InfoPanel>
 
         <InfoPanel
