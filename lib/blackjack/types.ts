@@ -34,6 +34,11 @@ export interface InsuranceGuidance {
 }
 
 export interface Recommendation {
+  baseAction: ActionType;
+  finalAction: ActionType;
+  deviationApplied: boolean;
+  deviationExplanation: string;
+  countState: CountState;
   primaryAction: ActionType;
   fallbackAction?: ActionType;
   rationale: string;
@@ -44,7 +49,7 @@ export interface Recommendation {
 
 export interface CountState {
   runningCount: number;
-  trueCount?: number;
+  trueCount: number;
   decksRemaining?: number;
 }
 
