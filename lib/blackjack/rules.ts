@@ -10,13 +10,26 @@ const REGULAR_RULESET: Ruleset = {
   blackjackPayout: '3:2',
 };
 
-const RULES: Record<BlackjackMode, Ruleset> = {
-  regular: REGULAR_RULESET,
-  infinity: {
-    ...REGULAR_RULESET,
+// Infinity Blackjack starts from the same basic-strategy baseline as regular blackjack,
+// then applies only the assumptions listed here.
+const INFINITY_RULE_ASSUMPTIONS: Pick<Ruleset, 'decks' | 'dealerHitsSoft17' | 'surrender'> = {
+  decks: 8,
+  dealerHitsSoft17: true,
+  surrender: false,
+};
+
+function buildInfinityRuleset(baseRuleset: Ruleset): Ruleset {
+  return {
+    ...baseRuleset,
     mode: 'infinity',
     label: 'Infinity Blackjack',
-  },
+    ...INFINITY_RULE_ASSUMPTIONS,
+  };
+}
+
+const RULES: Record<BlackjackMode, Ruleset> = {
+  regular: REGULAR_RULESET,
+  infinity: buildInfinityRuleset(REGULAR_RULESET),
 };
 
 export function getRuleset(mode: BlackjackMode): Ruleset {

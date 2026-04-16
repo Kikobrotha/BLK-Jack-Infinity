@@ -27,7 +27,7 @@ const REGULAR_MODE_CONFIG: BlackjackModeConfig = {
 const INFINITY_MODE_CONFIG: BlackjackModeConfig = {
   id: 'infinity',
   label: 'Infinity Blackjack',
-  shortDescription: 'Infinity blackjack rules profile with placeholder defaults for future engine wiring.',
+  shortDescription: 'Starts from regular basic-strategy rules, then applies Infinity assumptions (8 decks, H17, no surrender).',
   rulesConfig: {
     deckCount: 8,
     dealerHitsSoft17: true,
