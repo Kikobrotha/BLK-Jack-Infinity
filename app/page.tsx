@@ -5,14 +5,11 @@ import { AppShell } from '@/components/AppShell';
 import CardPicker from '@/components/blackjack/CardPicker';
 import { InfoPanel } from '@/components/InfoPanel';
 import { ModeSelector } from '@/components/ModeSelector';
-import { cardLabel, evaluateHand } from '@/lib/blackjack/handEvaluator';
-import { getBlackjackAdvice } from '@/lib/blackjack/advisor';
 import { BLACKJACK_MODE_MAP, BLACKJACK_MODES } from '@/lib/blackjack/modes';
 import type { CardRank } from '@/lib/blackjack/types';
 import { DEFAULT_MODE } from '@/lib/modes';
 
 const MAX_PLAYER_CARDS = 6;
-const MAX_SEEN_CARDS = 20;
 
 function addCardWithCap(cards: CardRank[], rank: CardRank, maxCards: number): CardRank[] {
   if (cards.length >= maxCards) {
@@ -29,79 +26,49 @@ export default function HomePage() {
   const [selectedMode, setSelectedMode] = useState(DEFAULT_MODE);
   const [playerCards, setPlayerCards] = useState<CardRank[]>([]);
   const [dealerUpcard, setDealerUpcard] = useState<CardRank[]>([]);
-  const [seenCards, setSeenCards] = useState<CardRank[]>([]);
 
   const selectedModeConfig = useMemo(() => BLACKJACK_MODE_MAP[selectedMode], [selectedMode]);
-  const playerHand = useMemo(() => evaluateHand(playerCards), [playerCards]);
-  const dealerCard = dealerUpcard[0];
-
-  const recommendation = useMemo(() => {
-    if (playerCards.length < 2 || !dealerCard) {
-      return null;
-    }
-
-    const exposedCards: CardRank[] = [...playerCards, dealerCard, ...seenCards];
-    return getBlackjackAdvice(selectedMode, playerCards, dealerCard, exposedCards);
-  }, [dealerCard, playerCards, seenCards, selectedMode]);
 
   return (
     <AppShell
       title="Blackjack Assistant"
-      subtitle="Minimal assistant shell for hand entry, dealer upcard tracking, and action guidance."
+      subtitle="Baccarat-Oracle-style shell adapted for blackjack assistant workflows."
     >
       <div className="grid gap-4 lg:grid-cols-2">
         <ModeSelector
           selectedMode={selectedMode}
           modes={BLACKJACK_MODES}
           onModeChange={setSelectedMode}
+          helperText="Select a ruleset profile for assistant context. Strategy logic is intentionally placeholder-only."
         />
 
-        <InfoPanel title="Count Info" description="Running count placeholders for future assistance logic.">
+        <InfoPanel
+          title="Count Info"
+          description="Placeholder panel for running count, true count, and decks remaining."
+        >
           <p className="text-sm text-slate-300">
             Current mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
           </p>
-          {recommendation ? (
-            <>
-              <p className="mt-2 text-sm text-slate-300">
-                Running count: <span className="font-medium text-slate-100">{recommendation.countState.runningCount}</span>
-              </p>
-              <p className="mt-1 text-sm text-slate-300">
-                True count: <span className="font-medium text-slate-100">{recommendation.countState.trueCount}</span>
-              </p>
-              <p className="mt-1 text-xs text-slate-400">
-                Decks remaining estimate: {recommendation.countState.decksRemaining}
-              </p>
-            </>
-          ) : (
-            <p className="mt-2 text-sm text-slate-400">
-              Add cards to see running count and true count context.
-            </p>
-          )}
+          <p className="mt-2 text-sm text-slate-400">Running count: —</p>
+          <p className="mt-1 text-sm text-slate-400">True count: —</p>
+          <p className="mt-1 text-xs text-slate-500">No counting engine is active in this shell yet.</p>
         </InfoPanel>
 
         <CardPicker
-          title="Player Cards"
+          title="Player Hand"
           cards={playerCards}
           onAddCard={rank => setPlayerCards(prev => addCardWithCap(prev, rank, MAX_PLAYER_CARDS))}
           onUndoCard={() => setPlayerCards(prev => removeLastCard(prev))}
           maxCards={MAX_PLAYER_CARDS}
         />
 
-        <InfoPanel title="Player Hand" description="Evaluated from the current player cards.">
-          <p className="text-sm text-slate-200">
-            Total: <span className="font-semibold text-white">{playerHand.total}</span>
+        <InfoPanel title="Player Hand Panel" description="Placeholder summary of the entered player hand.">
+          <p className="text-sm text-slate-300">
+            Cards entered: <span className="font-medium text-slate-100">{playerCards.length}</span>
           </p>
-          <p className="mt-1 text-sm text-slate-300">
-            Hand type:{' '}
-            <span className="font-medium text-slate-100">{playerHand.isSoft ? 'Soft' : 'Hard'}</span>
-          </p>
-          <p className="mt-1 text-sm text-slate-300">
-            Pair status:{' '}
-            <span className="font-medium text-slate-100">{playerHand.canSplit ? 'Pair (splittable)' : 'Not a pair'}</span>
-          </p>
-          {playerCards.length > 0 ? (
-            <p className="mt-3 text-xs text-slate-400">Entered cards: {playerCards.join(' · ')}</p>
-          ) : null}
+          <p className="mt-1 text-sm text-slate-400">Hand total: —</p>
+          <p className="mt-1 text-sm text-slate-400">Soft / hard status: —</p>
+          <p className="mt-1 text-xs text-slate-500">Evaluation logic will be connected in a later iteration.</p>
         </InfoPanel>
 
         <CardPicker
@@ -112,60 +79,25 @@ export default function HomePage() {
           maxCards={1}
         />
 
-        <CardPicker
-          title="Seen / Exposed Cards (Optional)"
-          cards={seenCards}
-          onAddCard={rank => setSeenCards(prev => addCardWithCap(prev, rank, MAX_SEEN_CARDS))}
-          onUndoCard={() => setSeenCards(prev => removeLastCard(prev))}
-          maxCards={MAX_SEEN_CARDS}
-        />
+        <InfoPanel title="Dealer Upcard Panel" description="Placeholder view for dealer upcard context.">
+          <p className="text-sm text-slate-300">
+            Upcard selected:{' '}
+            <span className="font-medium text-slate-100">{dealerUpcard.length ? dealerUpcard[0] : 'None'}</span>
+          </p>
+          <p className="mt-1 text-xs text-slate-500">Dealer hand resolution is intentionally not implemented yet.</p>
+        </InfoPanel>
 
         <InfoPanel
           title="Recommendation"
-          description="Assistant guidance based on selected mode and current hand."
+          description="Assistant recommendation panel (placeholder only, not a predictor)."
           className="lg:col-span-2"
         >
-          {recommendation ? (
-            <div className="space-y-2 text-sm text-slate-200">
-              <p>
-                Base action:{' '}
-                <span className="font-semibold text-white">{recommendation.baseAction}</span>
-              </p>
-              <p>
-                Final action:{' '}
-                <span className="font-semibold text-white">{recommendation.finalAction}</span>
-              </p>
-              <p>
-                Deviation applied:{' '}
-                <span className="font-medium text-slate-100">{recommendation.deviationApplied ? 'Yes' : 'No'}</span>
-              </p>
-              <p>
-                Running / True count:{' '}
-                <span className="font-medium text-slate-100">
-                  {recommendation.countState.runningCount} / {recommendation.countState.trueCount}
-                </span>
-              </p>
-              <p className="text-slate-300">{recommendation.rationale}</p>
-              <p className="text-slate-300">{recommendation.deviationExplanation}</p>
-              <p>
-                Selected mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
-              </p>
-              <p>
-                Player hand summary:{' '}
-                <span className="font-medium text-slate-100">
-                  {playerCards.join(' · ')} ({recommendation.handValue.isSoft ? 'Soft' : 'Hard'} {recommendation.handValue.total})
-                </span>
-              </p>
-              <p>
-                Dealer upcard summary:{' '}
-                <span className="font-medium text-slate-100">{cardLabel(dealerCard)} ({dealerCard})</span>
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-slate-400">
-              Enter at least two player cards and one dealer upcard to see a recommendation.
-            </p>
-          )}
+          <p className="text-sm text-slate-300">Base action: —</p>
+          <p className="mt-1 text-sm text-slate-300">Final action: —</p>
+          <p className="mt-1 text-sm text-slate-400">Rationale: This shell is ready for future assistant guidance wiring.</p>
+          <p className="mt-1 text-xs text-slate-500">
+            This interface is an assistant scaffold and does not provide predictive or guaranteed outcomes.
+          </p>
         </InfoPanel>
       </div>
     </AppShell>
