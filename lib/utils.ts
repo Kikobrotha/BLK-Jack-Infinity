@@ -8,3 +8,7 @@ export function formatModeLabel(mode: GameMode): string {
   if (mode === 'infinity') return 'Infinity';
   return 'Regular';
 }
+
+export function formatModelLabel(mode: GameMode): string {
+  return formatModeLabel(mode);
+}

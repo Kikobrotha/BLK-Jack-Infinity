@@ -7,7 +7,7 @@ import { ModeSelector } from '@/components/ModeSelector';
 import { DEFAULT_MODE, MODES } from '@/lib/modes';
 import { getModeDescription } from '@/lib/rules';
 import { type GameMode } from '@/lib/types';
-import { formatModeLabel } from '@/lib/utils';
+import { formatModelLabel } from '@/lib/utils';
 
 export default function HomePage() {
   const [mode, setMode] = useState<GameMode>(DEFAULT_MODE);
@@ -25,7 +25,7 @@ export default function HomePage() {
           description="Core configuration context for recommendations."
         >
           <p className="text-sm text-slate-300">
-            Current mode: <span className="font-medium text-slate-100">{formatModeLabel(mode)}</span>
+            Current mode: <span className="font-medium text-slate-100">{formatModelLabel(mode)}</span>
           </p>
           <p className="mt-2 text-sm text-slate-400">Detailed rules and toggles will appear here.</p>
         </InfoPanel>
