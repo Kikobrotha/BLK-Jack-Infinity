@@ -40,8 +40,9 @@ export default function HomePage() {
       return null;
     }
 
-    return getBlackjackAdvice(selectedMode, playerCards, dealerCard);
-  }, [dealerCard, playerCards, selectedMode]);
+    const exposedCards: CardRank[] = [...playerCards, dealerCard, ...seenCards];
+    return getBlackjackAdvice(selectedMode, playerCards, dealerCard, exposedCards);
+  }, [dealerCard, playerCards, seenCards, selectedMode]);
 
   return (
     <AppShell
@@ -59,9 +60,23 @@ export default function HomePage() {
           <p className="text-sm text-slate-300">
             Current mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
           </p>
-          <p className="mt-2 text-sm text-slate-400">
-            Placeholder for running count, true count, and decks remaining.
-          </p>
+          {recommendation ? (
+            <>
+              <p className="mt-2 text-sm text-slate-300">
+                Running count: <span className="font-medium text-slate-100">{recommendation.countState.runningCount}</span>
+              </p>
+              <p className="mt-1 text-sm text-slate-300">
+                True count: <span className="font-medium text-slate-100">{recommendation.countState.trueCount}</span>
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Decks remaining estimate: {recommendation.countState.decksRemaining}
+              </p>
+            </>
+          ) : (
+            <p className="mt-2 text-sm text-slate-400">
+              Add cards to see running count and true count context.
+            </p>
+          )}
         </InfoPanel>
 
         <CardPicker
@@ -113,10 +128,25 @@ export default function HomePage() {
           {recommendation ? (
             <div className="space-y-2 text-sm text-slate-200">
               <p>
-                Recommended action:{' '}
-                <span className="font-semibold text-white">{recommendation.primaryAction}</span>
+                Base action:{' '}
+                <span className="font-semibold text-white">{recommendation.baseAction}</span>
+              </p>
+              <p>
+                Final action:{' '}
+                <span className="font-semibold text-white">{recommendation.finalAction}</span>
+              </p>
+              <p>
+                Deviation applied:{' '}
+                <span className="font-medium text-slate-100">{recommendation.deviationApplied ? 'Yes' : 'No'}</span>
+              </p>
+              <p>
+                Running / True count:{' '}
+                <span className="font-medium text-slate-100">
+                  {recommendation.countState.runningCount} / {recommendation.countState.trueCount}
+                </span>
               </p>
               <p className="text-slate-300">{recommendation.rationale}</p>
+              <p className="text-slate-300">{recommendation.deviationExplanation}</p>
               <p>
                 Selected mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
               </p>
