@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import CardPicker from '@/components/blackjack/CardPicker';
 import { InfoPanel } from '@/components/InfoPanel';
@@ -16,6 +16,15 @@ const MAX_PLAYER_CARDS = 6;
 const MAX_EXPOSED_CARDS = 20;
 
 type MainAction = 'HIT' | 'STAND' | 'DOUBLE' | 'SPLIT' | 'SURRENDER' | 'INSURANCE' | 'WAITING';
+type LayoutOption = 'classic' | 'focus' | 'compact' | 'mobile-stack';
+
+const LAYOUT_STORAGE_KEY = 'blackjack-layout-option';
+const LAYOUT_OPTIONS: ReadonlyArray<{ id: LayoutOption; label: string; description: string }> = [
+  { id: 'classic', label: 'Classic', description: 'Balanced two-column layout for most screens.' },
+  { id: 'focus', label: 'Focus', description: 'Emphasizes recommendation details in wider viewports.' },
+  { id: 'compact', label: 'Compact', description: 'Denser multi-column layout for large screens.' },
+  { id: 'mobile-stack', label: 'Mobile Stack', description: 'Forces a single stacked column at all sizes.' },
+];
 
 function addCardWithCap(cards: CardRank[], rank: CardRank, maxCards: number): CardRank[] {
   if (cards.length >= maxCards) {
@@ -49,9 +58,23 @@ function actionStyle(mainAction: MainAction): string {
 
 export default function HomePage() {
   const [selectedMode, setSelectedMode] = useState(DEFAULT_MODE);
+  const [selectedLayout, setSelectedLayout] = useState<LayoutOption>('classic');
   const [playerCards, setPlayerCards] = useState<CardRank[]>([]);
   const [dealerUpcard, setDealerUpcard] = useState<CardRank[]>([]);
   const [exposedCards, setExposedCards] = useState<CardRank[]>([]);
+
+  useEffect(() => {
+    const savedLayout = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (!savedLayout || !LAYOUT_OPTIONS.some(layout => layout.id === savedLayout)) {
+      return;
+    }
+
+    setSelectedLayout(savedLayout as LayoutOption);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(LAYOUT_STORAGE_KEY, selectedLayout);
+  }, [selectedLayout]);
 
   const selectedModeConfig = useMemo(() => BLACKJACK_MODE_MAP[selectedMode], [selectedMode]);
   const playerHandValue = useMemo(() => evaluateHand(playerCards), [playerCards]);
@@ -99,17 +122,63 @@ export default function HomePage() {
   }, [countCards, countState.runningCount, countState.trueCount, dealerUpcard, playerCards, playerHandValue.total, selectedMode, selectedModeConfig.label]);
 
   const recommendationTheme = actionStyle(recommendationView.mainAction);
+  const layoutClassName = useMemo(() => {
+    switch (selectedLayout) {
+      case 'focus':
+        return 'grid gap-4 lg:grid-cols-2 xl:grid-cols-3';
+      case 'compact':
+        return 'grid gap-3 lg:grid-cols-3';
+      case 'mobile-stack':
+        return 'grid gap-4';
+      default:
+        return 'grid gap-4 lg:grid-cols-2';
+    }
+  }, [selectedLayout]);
+  const recommendationPanelClassName = useMemo(() => {
+    switch (selectedLayout) {
+      case 'focus':
+        return 'lg:col-span-2 xl:col-span-3';
+      case 'compact':
+        return 'lg:col-span-3';
+      case 'mobile-stack':
+        return '';
+      default:
+        return 'lg:col-span-2';
+    }
+  }, [selectedLayout]);
 
   return (
     <AppShell
       title="Blackjack Assistant"
       subtitle="Fast table-side blackjack guidance with instant high-visibility action output."
     >
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className={layoutClassName}>
+        <section className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+          <h2 className="text-lg font-semibold text-white">Layout Options</h2>
+          <label className="mt-4 block text-sm font-medium text-slate-200" htmlFor="layout-selector">
+            Assistant Layout
+          </label>
+          <select
+            id="layout-selector"
+            value={selectedLayout}
+            onChange={event => setSelectedLayout(event.target.value as LayoutOption)}
+            className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+          >
+            {LAYOUT_OPTIONS.map(layout => (
+              <option key={layout.id} value={layout.id}>
+                {layout.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-3 text-sm text-slate-300">
+            {LAYOUT_OPTIONS.find(layout => layout.id === selectedLayout)?.description}
+          </p>
+        </section>
+
         <InfoPanel
           title="Live Recommendation"
           description="Primary action updates instantly as soon as card inputs change."
-          className="lg:col-span-2"
+          className={recommendationPanelClassName}
         >
           <div className={`rounded-2xl border bg-gradient-to-br px-5 py-6 shadow-[0_0_28px_rgba(15,23,42,0.55)] ${recommendationTheme}`}>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-200/90">Main Action</p>
