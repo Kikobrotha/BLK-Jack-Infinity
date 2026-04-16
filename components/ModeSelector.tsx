@@ -19,7 +19,7 @@ export function ModeSelector({ selectedMode, modes, helperText }: ModeSelectorPr
       <select
         id="mode-selector"
         value={selectedMode}
-        readOnly
+        disabled
         className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
       >
         {modes.map(mode => (
