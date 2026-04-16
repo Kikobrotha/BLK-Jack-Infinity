@@ -5,7 +5,8 @@ import { AppShell } from '@/components/AppShell';
 import CardPicker from '@/components/blackjack/CardPicker';
 import { InfoPanel } from '@/components/InfoPanel';
 import { ModeSelector } from '@/components/ModeSelector';
-import { evaluateHand } from '@/lib/blackjack/handEvaluator';
+import { cardLabel, evaluateHand } from '@/lib/blackjack/handEvaluator';
+import { getBlackjackAdvice } from '@/lib/blackjack/advisor';
 import { BLACKJACK_MODE_MAP, BLACKJACK_MODES } from '@/lib/blackjack/modes';
 import type { CardRank } from '@/lib/blackjack/types';
 import { DEFAULT_MODE } from '@/lib/modes';
@@ -32,6 +33,15 @@ export default function HomePage() {
 
   const selectedModeConfig = useMemo(() => BLACKJACK_MODE_MAP[selectedMode], [selectedMode]);
   const playerHand = useMemo(() => evaluateHand(playerCards), [playerCards]);
+  const dealerCard = dealerUpcard[0];
+
+  const recommendation = useMemo(() => {
+    if (playerCards.length < 2 || !dealerCard) {
+      return null;
+    }
+
+    return getBlackjackAdvice(selectedMode, playerCards, dealerCard);
+  }, [dealerCard, playerCards, selectedMode]);
 
   return (
     <AppShell
@@ -100,10 +110,32 @@ export default function HomePage() {
           description="Assistant guidance based on selected mode and current hand."
           className="lg:col-span-2"
         >
-          <p className="text-sm text-slate-400">
-            Strategy recommendations are intentionally not enabled yet. This screen now captures visible cards
-            safely for future assistant logic.
-          </p>
+          {recommendation ? (
+            <div className="space-y-2 text-sm text-slate-200">
+              <p>
+                Recommended action:{' '}
+                <span className="font-semibold text-white">{recommendation.primaryAction}</span>
+              </p>
+              <p className="text-slate-300">{recommendation.rationale}</p>
+              <p>
+                Selected mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
+              </p>
+              <p>
+                Player hand summary:{' '}
+                <span className="font-medium text-slate-100">
+                  {playerCards.join(' · ')} ({recommendation.handValue.isSoft ? 'Soft' : 'Hard'} {recommendation.handValue.total})
+                </span>
+              </p>
+              <p>
+                Dealer upcard summary:{' '}
+                <span className="font-medium text-slate-100">{cardLabel(dealerCard)} ({dealerCard})</span>
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400">
+              Enter at least two player cards and one dealer upcard to see a recommendation.
+            </p>
+          )}
         </InfoPanel>
       </div>
     </AppShell>
