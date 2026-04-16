@@ -14,6 +14,12 @@ import { DEFAULT_MODE } from '@/lib/modes';
 
 const MAX_PLAYER_CARDS = 6;
 const MAX_EXPOSED_CARDS = 20;
+const COLLAPSE_STORAGE_KEYS = {
+  modeSelector: 'blackjack-collapse-mode-selector',
+  playerCards: 'blackjack-collapse-player-cards',
+  dealerUpcard: 'blackjack-collapse-dealer-upcard',
+  exposedCards: 'blackjack-collapse-exposed-cards',
+} as const;
 
 type MainAction = 'HIT' | 'STAND' | 'DOUBLE' | 'SPLIT' | 'SURRENDER' | 'INSURANCE' | 'WAITING';
 type LayoutOption = 'classic' | 'focus' | 'compact' | 'mobile-stack';
@@ -282,6 +288,8 @@ export default function HomePage() {
           modes={BLACKJACK_MODES}
           onModeChange={setSelectedMode}
           helperText="Select a ruleset profile used for recommendation and count context."
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.modeSelector}
         />
 
         <InfoPanel
@@ -303,6 +311,8 @@ export default function HomePage() {
           onAddCard={rank => setPlayerCards(prev => addCardWithCap(prev, rank, MAX_PLAYER_CARDS))}
           onUndoCard={() => setPlayerCards(prev => removeLastCard(prev))}
           maxCards={MAX_PLAYER_CARDS}
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.playerCards}
         />
 
         <InfoPanel title="Player Hand Panel" description="Current player hand context.">
@@ -323,6 +333,8 @@ export default function HomePage() {
           onAddCard={rank => setDealerUpcard([rank])}
           onUndoCard={() => setDealerUpcard([])}
           maxCards={1}
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.dealerUpcard}
         />
 
         <InfoPanel title="Dealer Upcard Panel" description="Dealer upcard context.">
@@ -338,6 +350,8 @@ export default function HomePage() {
           onAddCard={rank => setExposedCards(prev => addCardWithCap(prev, rank, MAX_EXPOSED_CARDS))}
           onUndoCard={() => setExposedCards(prev => removeLastCard(prev))}
           maxCards={MAX_EXPOSED_CARDS}
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.exposedCards}
         />
 
         <InfoPanel
