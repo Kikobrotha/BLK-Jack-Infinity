@@ -19,7 +19,9 @@ const COLLAPSE_STORAGE_KEYS = {
   modeSelector: 'blackjack-collapse-mode-selector',
   playerCards: 'blackjack-collapse-player-cards',
   dealerUpcard: 'blackjack-collapse-dealer-upcard',
+  playerDealerHand: 'blackjack-collapse-player-dealer-hand-panel',
   exposedCards: 'blackjack-collapse-exposed-cards',
+  seenCardsPanel: 'blackjack-collapse-seen-cards-panel',
 } as const;
 
 type MainAction = 'HIT' | 'STAND' | 'DOUBLE' | 'SPLIT' | 'SURRENDER' | 'INSURANCE' | 'WAITING';
@@ -319,7 +321,12 @@ export default function HomePage() {
           collapseStorageKey={COLLAPSE_STORAGE_KEYS.playerCards}
         />
 
-        <InfoPanel title="Player Hand Panel" description="Current player hand context.">
+        <InfoPanel
+          title="Player/Dealer hand panel"
+          description="Current player and dealer hand context."
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.playerDealerHand}
+        >
           <p className="text-sm text-slate-300">
             Cards entered: <span className="font-medium text-slate-100">{playerCards.length}</span>
           </p>
@@ -328,6 +335,10 @@ export default function HomePage() {
           <p className="mt-1 text-sm text-slate-400">Pair status: {playerPairLabel}</p>
           <p className="mt-1 text-xs text-slate-500">
             Blackjack: {playerHandValue.isBlackjack ? 'Yes' : 'No'} · Bust: {playerHandValue.isBust ? 'Yes' : 'No'}
+          </p>
+          <p className="mt-3 text-sm text-slate-300">
+            Dealer upcard selected:{' '}
+            <span className="font-medium text-slate-100">{dealerUpcard.length ? dealerUpcard[0] : 'None'}</span>
           </p>
         </InfoPanel>
 
@@ -340,13 +351,6 @@ export default function HomePage() {
           collapsible
           collapseStorageKey={COLLAPSE_STORAGE_KEYS.dealerUpcard}
         />
-
-        <InfoPanel title="Dealer Upcard Panel" description="Dealer upcard context.">
-          <p className="text-sm text-slate-300">
-            Upcard selected:{' '}
-            <span className="font-medium text-slate-100">{dealerUpcard.length ? dealerUpcard[0] : 'None'}</span>
-          </p>
-        </InfoPanel>
 
         <CardPicker
           title="Seen / Exposed Cards (Optional)"
@@ -361,6 +365,8 @@ export default function HomePage() {
         <InfoPanel
           title="Seen Cards Panel"
           description="Visible cards for counting context input."
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.seenCardsPanel}
         >
           <p className="text-sm text-slate-300">
             Exposed cards entered: <span className="font-medium text-slate-100">{exposedCards.length}</span>
