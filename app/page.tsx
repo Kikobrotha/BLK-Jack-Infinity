@@ -155,6 +155,10 @@ export default function HomePage() {
         return 'lg:col-span-2';
     }
   }, [selectedLayout]);
+  const handleNextRound = () => {
+    setPlayerCards([]);
+    setDealerUpcard([]);
+  };
 
   return (
     <AppShell
@@ -189,6 +193,16 @@ export default function HomePage() {
           description="Primary action updates instantly as soon as card inputs change."
           className={recommendationPanelClassName}
         >
+          <div className="mb-4 flex justify-end">
+            <button
+              type="button"
+              onClick={handleNextRound}
+              disabled={playerCards.length === 0 && dealerUpcard.length === 0}
+              className="rounded-md border border-emerald-400/70 bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300 hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next Round
+            </button>
+          </div>
           <div className={`rounded-2xl border bg-gradient-to-br px-5 py-6 shadow-[0_0_28px_rgba(15,23,42,0.55)] ${recommendationTheme}`}>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-200/90">Main Action</p>
             <p className="mt-2 text-5xl font-black tracking-wide sm:text-6xl lg:text-7xl">{recommendationView.mainAction}</p>
