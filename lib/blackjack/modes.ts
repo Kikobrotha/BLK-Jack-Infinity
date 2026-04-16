@@ -24,25 +24,21 @@ const REGULAR_MODE_CONFIG: BlackjackModeConfig = {
   },
 };
 
-const INFINITY_MODE_ASSUMPTIONS: BlackjackModeConfig['rulesConfig'] = {
-  deckCount: 8,
-  dealerHitsSoft17: true,
-  doubleAfterSplit: true,
-  surrenderAllowed: false,
+const INFINITY_MODE_CONFIG: BlackjackModeConfig = {
+  id: 'infinity',
+  label: 'Infinity Blackjack',
+  shortDescription: 'Infinity blackjack rules profile with placeholder defaults for future engine wiring.',
+  rulesConfig: {
+    deckCount: 8,
+    dealerHitsSoft17: true,
+    doubleAfterSplit: true,
+    surrenderAllowed: false,
+  },
 };
 
-export const BLACKJACK_MODES: readonly BlackjackModeConfig[] = [
-  REGULAR_MODE_CONFIG,
-  {
-    ...REGULAR_MODE_CONFIG,
-    id: 'infinity',
-    label: 'Infinity Blackjack',
-    shortDescription: 'Infinity blackjack profile built from regular rules plus Infinity-only assumptions.',
-    rulesConfig: INFINITY_MODE_ASSUMPTIONS,
-  },
-] as const;
+export const BLACKJACK_MODES: readonly BlackjackModeConfig[] = [REGULAR_MODE_CONFIG, INFINITY_MODE_CONFIG] as const;
 
 export const BLACKJACK_MODE_MAP: Record<GameMode, BlackjackModeConfig> = {
-  regular: BLACKJACK_MODES[0],
-  infinity: BLACKJACK_MODES[1],
+  regular: REGULAR_MODE_CONFIG,
+  infinity: INFINITY_MODE_CONFIG,
 };
