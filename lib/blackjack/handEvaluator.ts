@@ -10,7 +10,13 @@ export function rankValue(rank: CardRank): number {
 
 export function evaluateHand(cards: CardRank[]): HandValue {
   if (cards.length === 0) {
-    return { total: 0, isSoft: false, isBlackjack: false, isBust: false };
+    return {
+      total: 0,
+      isSoft: false,
+      isBlackjack: false,
+      isBust: false,
+      canSplit: false,
+    };
   }
 
   let total = cards.reduce((sum, card) => sum + rankValue(card), 0);
@@ -29,6 +35,7 @@ export function evaluateHand(cards: CardRank[]): HandValue {
     isSoft,
     isBlackjack,
     isBust: total > 21,
+    canSplit: isPair(cards),
   };
 }
 
