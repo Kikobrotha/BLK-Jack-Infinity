@@ -1,11 +1,23 @@
 import { CardRank, HandValue } from './types';
 
-const TEN_VALUE_RANKS: CardRank[] = ['10', 'J', 'Q', 'K'];
+const RANK_VALUE: Record<CardRank, number> = {
+  A: 11,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
+  '10': 10,
+  J: 10,
+  Q: 10,
+  K: 10,
+};
 
 export function rankValue(rank: CardRank): number {
-  if (rank === 'A') return 11;
-  if (TEN_VALUE_RANKS.includes(rank)) return 10;
-  return Number(rank);
+  return RANK_VALUE[rank];
 }
 
 export function evaluateHand(cards: CardRank[]): HandValue {
@@ -20,14 +32,14 @@ export function evaluateHand(cards: CardRank[]): HandValue {
   }
 
   let total = cards.reduce((sum, card) => sum + rankValue(card), 0);
-  let aces = cards.filter(card => card === 'A').length;
+  let acesAsEleven = cards.filter(card => card === 'A').length;
 
-  while (total > 21 && aces > 0) {
+  while (total > 21 && acesAsEleven > 0) {
     total -= 10;
-    aces -= 1;
+    acesAsEleven -= 1;
   }
 
-  const isSoft = cards.includes('A') && total <= 21 && aces > 0;
+  const isSoft = acesAsEleven > 0 && total <= 21;
   const isBlackjack = cards.length === 2 && total === 21;
 
   return {
