@@ -22,7 +22,6 @@ export default function HomePage() {
           selectedMode={selectedMode}
           modes={BLACKJACK_MODES}
           onModeChange={setSelectedMode}
-          helperText={selectedModeConfig.shortDescription}
         />
 
         <InfoPanel title="Count Info" description="Running count placeholders for future assistance logic.">
