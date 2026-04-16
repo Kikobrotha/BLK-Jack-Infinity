@@ -18,7 +18,8 @@ export default function CardPicker({ title, cards, onAddCard, onUndoCard, maxCar
         <button
           type="button"
           onClick={onUndoCard}
-          className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-200 hover:border-slate-500"
+          disabled={cards.length === 0}
+          className="rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-200 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Undo
         </button>
