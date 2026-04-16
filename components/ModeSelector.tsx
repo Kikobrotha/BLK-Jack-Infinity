@@ -10,11 +10,11 @@ type ModeSelectorProps = {
 export function ModeSelector({ selectedMode, modes, helperText }: ModeSelectorProps) {
   return (
     <section className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-      <h2 className="text-lg font-semibold text-white">Mode</h2>
-      <p className="mt-1 text-sm text-slate-400">Top-level mode selector placeholder.</p>
+      <h2 className="text-lg font-semibold text-white">Mode Selector</h2>
+      <p className="mt-1 text-sm text-slate-400">Blackjack ruleset selector placeholder.</p>
 
       <label className="mt-4 block text-sm font-medium text-slate-200" htmlFor="mode-selector">
-        Table Mode
+        Blackjack Mode
       </label>
       <select
         id="mode-selector"
