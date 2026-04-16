@@ -14,6 +14,11 @@ import { DEFAULT_MODE } from '@/lib/modes';
 
 const MAX_PLAYER_CARDS = 6;
 const MAX_EXPOSED_CARDS = 20;
+const COLLAPSE_STORAGE_KEYS = {
+  modeSelector: 'blackjack-collapse-mode-selector',
+  playerDealerPanel: 'blackjack-collapse-player-dealer-panel',
+  seenCardsPanel: 'blackjack-collapse-seen-cards-panel',
+} as const;
 
 type MainAction = 'HIT' | 'STAND' | 'DOUBLE' | 'SPLIT' | 'SURRENDER' | 'INSURANCE' | 'WAITING';
 type LayoutOption = 'classic' | 'focus' | 'compact' | 'mobile-stack';
@@ -282,6 +287,8 @@ export default function HomePage() {
           modes={BLACKJACK_MODES}
           onModeChange={setSelectedMode}
           helperText="Select a ruleset profile used for recommendation and count context."
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.modeSelector}
         />
 
         <InfoPanel
@@ -305,7 +312,12 @@ export default function HomePage() {
           maxCards={MAX_PLAYER_CARDS}
         />
 
-        <InfoPanel title="Player Hand Panel" description="Current player hand context.">
+        <InfoPanel
+          title="Player/Dealer hand panel"
+          description="Current player hand and dealer upcard context."
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.playerDealerPanel}
+        >
           <p className="text-sm text-slate-300">
             Cards entered: <span className="font-medium text-slate-100">{playerCards.length}</span>
           </p>
@@ -314,6 +326,10 @@ export default function HomePage() {
           <p className="mt-1 text-sm text-slate-400">Pair status: {playerPairLabel}</p>
           <p className="mt-1 text-xs text-slate-500">
             Blackjack: {playerHandValue.isBlackjack ? 'Yes' : 'No'} · Bust: {playerHandValue.isBust ? 'Yes' : 'No'}
+          </p>
+          <p className="mt-2 text-sm text-slate-300">
+            Dealer upcard:{' '}
+            <span className="font-medium text-slate-100">{dealerUpcard.length ? dealerUpcard[0] : 'None'}</span>
           </p>
         </InfoPanel>
 
@@ -324,13 +340,6 @@ export default function HomePage() {
           onUndoCard={() => setDealerUpcard([])}
           maxCards={1}
         />
-
-        <InfoPanel title="Dealer Upcard Panel" description="Dealer upcard context.">
-          <p className="text-sm text-slate-300">
-            Upcard selected:{' '}
-            <span className="font-medium text-slate-100">{dealerUpcard.length ? dealerUpcard[0] : 'None'}</span>
-          </p>
-        </InfoPanel>
 
         <CardPicker
           title="Seen / Exposed Cards (Optional)"
@@ -343,6 +352,8 @@ export default function HomePage() {
         <InfoPanel
           title="Seen Cards Panel"
           description="Visible cards for counting context input."
+          collapsible
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.seenCardsPanel}
         >
           <p className="text-sm text-slate-300">
             Exposed cards entered: <span className="font-medium text-slate-100">{exposedCards.length}</span>
