@@ -22,6 +22,7 @@ export interface HandValue {
   isSoft: boolean;
   isBlackjack: boolean;
   isBust: boolean;
+  canSplit: boolean;
 }
 
 export interface Recommendation {
