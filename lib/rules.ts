@@ -1,10 +1,6 @@
+import { BLACKJACK_MODE_MAP } from '@/lib/blackjack/modes';
 import { type GameMode } from '@/lib/types';
 
-const MODE_DESCRIPTIONS: Record<GameMode, string> = {
-  regular: 'Standard blackjack rules placeholder.',
-  infinity: 'Infinity blackjack-style table rules placeholder.',
-};
-
 export function getModeDescription(mode: GameMode): string {
-  return MODE_DESCRIPTIONS[mode];
+  return BLACKJACK_MODE_MAP[mode].shortDescription;
 }

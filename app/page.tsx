@@ -1,11 +1,17 @@
+'use client';
+
+import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { InfoPanel } from '@/components/InfoPanel';
 import { ModeSelector } from '@/components/ModeSelector';
-import { DEFAULT_MODE, MODES } from '@/lib/modes';
-import { getModeDescription } from '@/lib/rules';
-import { formatModeLabel } from '@/lib/utils';
+import { BLACKJACK_MODE_MAP, BLACKJACK_MODES } from '@/lib/blackjack/modes';
+import { DEFAULT_MODE } from '@/lib/modes';
 
 export default function HomePage() {
+  const [selectedMode, setSelectedMode] = useState(DEFAULT_MODE);
+
+  const selectedModeConfig = useMemo(() => BLACKJACK_MODE_MAP[selectedMode], [selectedMode]);
+
   return (
     <AppShell
       title="Blackjack Assistant"
@@ -13,14 +19,15 @@ export default function HomePage() {
     >
       <div className="grid gap-4 lg:grid-cols-2">
         <ModeSelector
-          selectedMode={DEFAULT_MODE}
-          modes={MODES}
-          helperText={getModeDescription(DEFAULT_MODE)}
+          selectedMode={selectedMode}
+          modes={BLACKJACK_MODES}
+          onModeChange={setSelectedMode}
+          helperText={selectedModeConfig.shortDescription}
         />
 
         <InfoPanel title="Count Info" description="Running count placeholders for future assistance logic.">
           <p className="text-sm text-slate-300">
-            Current mode: <span className="font-medium text-slate-100">{formatModeLabel(DEFAULT_MODE)}</span>
+            Current mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
           </p>
           <p className="mt-2 text-sm text-slate-400">
             Placeholder for running count, true count, and decks remaining.
