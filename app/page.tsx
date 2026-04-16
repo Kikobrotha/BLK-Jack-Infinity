@@ -1,29 +1,31 @@
+'use client';
+
+import { useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { InfoPanel } from '@/components/InfoPanel';
 import { ModeSelector } from '@/components/ModeSelector';
 import { DEFAULT_MODE, MODES } from '@/lib/modes';
 import { getModeDescription } from '@/lib/rules';
+import { type GameMode } from '@/lib/types';
 import { formatModeLabel } from '@/lib/utils';
 
 export default function HomePage() {
+  const [mode, setMode] = useState<GameMode>(DEFAULT_MODE);
+
   return (
     <AppShell
       title="Blackjack Assistant"
       subtitle="Minimal starter layout for hand input, upcard tracking, and recommendation output."
     >
       <div className="grid gap-4 lg:grid-cols-2">
-        <ModeSelector
-          selectedMode={DEFAULT_MODE}
-          modes={MODES}
-          helperText={getModeDescription(DEFAULT_MODE)}
-        />
+        <ModeSelector selectedMode={mode} modes={MODES} onChange={setMode} helperText={getModeDescription(mode)} />
 
         <InfoPanel
           title="Rules / Mode Info"
           description="Core configuration context for recommendations."
         >
           <p className="text-sm text-slate-300">
-            Current mode: <span className="font-medium text-slate-100">{formatModeLabel(DEFAULT_MODE)}</span>
+            Current mode: <span className="font-medium text-slate-100">{formatModeLabel(mode)}</span>
           </p>
           <p className="mt-2 text-sm text-slate-400">Detailed rules and toggles will appear here.</p>
         </InfoPanel>
