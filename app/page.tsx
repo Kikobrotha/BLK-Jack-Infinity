@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <AppShell
       title="Blackjack Assistant"
-      subtitle="Minimal starter layout for hand input, upcard tracking, and recommendation output."
+      subtitle="Minimal assistant shell for hand entry, dealer upcard tracking, and action guidance."
     >
       <div className="grid gap-4 lg:grid-cols-2">
         <ModeSelector
@@ -18,26 +18,33 @@ export default function HomePage() {
           helperText={getModeDescription(DEFAULT_MODE)}
         />
 
-        <InfoPanel
-          title="Rules / Mode Info"
-          description="Core configuration context for recommendations."
-        >
+        <InfoPanel title="Count Info" description="Running count placeholders for future assistance logic.">
           <p className="text-sm text-slate-300">
             Current mode: <span className="font-medium text-slate-100">{formatModeLabel(DEFAULT_MODE)}</span>
           </p>
-          <p className="mt-2 text-sm text-slate-400">Detailed rules and toggles will appear here.</p>
+          <p className="mt-2 text-sm text-slate-400">
+            Placeholder for running count, true count, and decks remaining.
+          </p>
         </InfoPanel>
 
-        <InfoPanel title="Player Hand" description="Card input and running total.">
-          <p className="text-sm text-slate-400">Placeholder for player cards, totals, and soft/hard hand status.</p>
+        <InfoPanel title="Player Hand" description="Player cards and hand state.">
+          <p className="text-sm text-slate-400">
+            Placeholder for card picks, hand total, and soft/hard status.
+          </p>
         </InfoPanel>
 
-        <InfoPanel title="Dealer Upcard" description="Visible dealer card.">
+        <InfoPanel title="Dealer Upcard" description="Dealer&apos;s visible card.">
           <p className="text-sm text-slate-400">Placeholder for selecting or displaying the dealer&apos;s upcard.</p>
         </InfoPanel>
 
-        <InfoPanel title="Recommendation" description="Best action based on mode and hand." className="lg:col-span-2">
-          <p className="text-sm text-slate-400">Placeholder for HIT / STAND / DOUBLE / SPLIT guidance.</p>
+        <InfoPanel
+          title="Recommendation"
+          description="Assistant guidance based on selected mode and current hand."
+          className="lg:col-span-2"
+        >
+          <p className="text-sm text-slate-400">
+            Placeholder for suggested actions such as HIT, STAND, DOUBLE, SPLIT, or SURRENDER.
+          </p>
         </InfoPanel>
       </div>
     </AppShell>
