@@ -1,6 +1,6 @@
-import { type Card, type Hand } from '@/lib/types';
+import { type Card, type PlayerHand } from '@/lib/types';
 
-export function createEmptyHand(): Hand {
+export function createEmptyHand(): PlayerHand {
   return {
     cards: [],
     total: 0,
@@ -8,7 +8,7 @@ export function createEmptyHand(): Hand {
   };
 }
 
-export function buildHand(cards: Card[]): Hand {
+export function buildHand(cards: Card[]): PlayerHand {
   return {
     cards,
     total: 0,

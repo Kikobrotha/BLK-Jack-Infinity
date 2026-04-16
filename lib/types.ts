@@ -9,15 +9,28 @@ export type Card = {
 
 export type GameMode = 'regular' | 'infinity';
 
-export type PlayerAction = 'hit' | 'stand' | 'double' | 'split' | 'surrender';
-
-export type Hand = {
+export type PlayerHand = {
   cards: Card[];
   total: number;
   isSoft: boolean;
 };
 
-export type Recommendation = {
-  primaryAction: PlayerAction;
+export type DealerUpcard = CardRank | null;
+
+export type ActionType = 'hit' | 'stand' | 'double' | 'split' | 'surrender';
+
+export type RecommendationType = {
+  primaryAction: ActionType;
   reason: string;
 };
+
+export type CountState = {
+  runningCount: number;
+  trueCount: number;
+  decksRemaining?: number;
+};
+
+// Backward-compatible aliases for existing imports.
+export type Hand = PlayerHand;
+export type PlayerAction = ActionType;
+export type Recommendation = RecommendationType;
