@@ -15,6 +15,7 @@ import { DEFAULT_MODE } from '@/lib/modes';
 const MAX_PLAYER_CARDS = 6;
 const MAX_EXPOSED_CARDS = 20;
 const COLLAPSE_STORAGE_KEYS = {
+  howItWorks: 'blackjack-collapse-how-it-works',
   modeSelector: 'blackjack-collapse-mode-selector',
   playerCards: 'blackjack-collapse-player-cards',
   dealerUpcard: 'blackjack-collapse-dealer-upcard',
@@ -238,6 +239,9 @@ export default function HomePage() {
         <InfoPanel
           title="How it Works"
           description="Quick guide for first-time users."
+          collapsible
+          defaultCollapsed
+          collapseStorageKey={COLLAPSE_STORAGE_KEYS.howItWorks}
         >
           <div className="space-y-4 text-sm text-slate-300">
             <div>
