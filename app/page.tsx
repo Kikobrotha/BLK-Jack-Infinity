@@ -229,6 +229,54 @@ export default function HomePage() {
           </div>
         </InfoPanel>
 
+        <InfoPanel
+          title="How it Works"
+          description="Quick guide for first-time users."
+        >
+          <div className="space-y-4 text-sm text-slate-300">
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">How it Works</h3>
+              <p className="mt-1">
+                This app is a blackjack assistant, not a predictor. It starts with basic strategy and then adjusts
+                the recommendation when count-based deviations apply.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">How to Use</h3>
+              <ol className="mt-1 list-decimal space-y-1 pl-5">
+                <li>Select a mode that matches your table rules.</li>
+                <li>Enter your player cards.</li>
+                <li>Enter the dealer upcard.</li>
+                <li>Optionally add seen / exposed cards for counting context when supported.</li>
+                <li>Read the recommendation panel.</li>
+              </ol>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Understanding Output</h3>
+              <ul className="mt-1 list-disc space-y-1 pl-5">
+                <li>
+                  <span className="font-medium text-slate-200">Base Action:</span> the basic strategy decision before
+                  count context.
+                </li>
+                <li>
+                  <span className="font-medium text-slate-200">Final Action:</span> the decision after applying any
+                  valid count deviation.
+                </li>
+                <li>
+                  <span className="font-medium text-slate-200">Deviation:</span> shows whether a count deviation was
+                  applied.
+                </li>
+                <li>
+                  <span className="font-medium text-slate-200">Running / True Count:</span> displayed when count
+                  context is available.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </InfoPanel>
+
         <ModeSelector
           selectedMode={selectedMode}
           modes={BLACKJACK_MODES}
