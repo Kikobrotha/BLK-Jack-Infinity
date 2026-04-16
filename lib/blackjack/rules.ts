@@ -10,27 +10,12 @@ const REGULAR_RULESET: Ruleset = {
   blackjackPayout: '3:2',
 };
 
-type InfinityAssumptions = Pick<Ruleset, 'decks' | 'dealerHitsSoft17' | 'doubleAfterSplit' | 'surrender' | 'blackjackPayout'>;
-
-/**
- * Infinity mode starts from regular basic-strategy assumptions and overrides
- * only the rule differences listed here.
- */
-const INFINITY_RULE_ASSUMPTIONS: InfinityAssumptions = {
-  decks: 8,
-  dealerHitsSoft17: true,
-  doubleAfterSplit: true,
-  surrender: false,
-  blackjackPayout: '3:2',
-};
-
 const RULES: Record<BlackjackMode, Ruleset> = {
   regular: REGULAR_RULESET,
   infinity: {
     ...REGULAR_RULESET,
     mode: 'infinity',
     label: 'Infinity Blackjack',
-    ...INFINITY_RULE_ASSUMPTIONS,
   },
 };
 

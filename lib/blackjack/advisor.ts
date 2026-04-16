@@ -1,5 +1,5 @@
 import { cardLabel, evaluateHand, isPair } from './handEvaluator';
-import { applyCountDeviations, calculateCountState } from './deviations';
+import { calculateCountState } from './counting';
 import { getRuleset } from './rules';
 import { recommendAction } from './strategy';
 import { AdviceResult, BlackjackMode, CardRank, InsuranceGuidance, StrategyHandType } from './types';
@@ -48,12 +48,11 @@ export function getBlackjackAdvice(
   const ruleset = getRuleset(mode);
   const handValue = evaluateHand(playerCards);
   const baseAction = recommendAction(playerCards, dealerUpcard, ruleset);
-  const countState = calculateCountState(exposedCards, ruleset.decks);
-  const deviationDecision = applyCountDeviations(playerCards, dealerUpcard, baseAction, countState);
-  const finalAction = deviationDecision.finalAction;
+  const finalAction = baseAction;
   const fallbackAction = fallbackFor(finalAction);
   const handType = classifyHand(playerCards);
   const insurance = insuranceGuidance(dealerUpcard);
+  const countState = calculateCountState(exposedCards, ruleset.decks);
 
   const handSummary =
     handType === 'pair'
@@ -62,16 +61,13 @@ export function getBlackjackAdvice(
         ? `${handType} ${handValue.total}`
         : handType;
   const upcardSummary = `${cardLabel(dealerUpcard)} (${dealerUpcard})`;
-  const deviationSummary = deviationDecision.deviationApplied
-    ? `Count deviation changed ${baseAction} to ${finalAction}.`
-    : `No count deviation change; keep ${finalAction}.`;
-  const rationale = `${ruleset.label}: ${handSummary} vs dealer ${upcardSummary}. Baseline suggests ${baseAction}. ${deviationSummary}`;
+  const rationale = `${ruleset.label}: ${handSummary} vs dealer ${upcardSummary}. Basic strategy recommends ${finalAction}.`;
 
   return {
     baseAction,
     finalAction,
-    deviationApplied: deviationDecision.deviationApplied,
-    deviationExplanation: deviationDecision.explanation,
+    deviationApplied: false,
+    deviationExplanation: 'Count deviations are disabled for this basic-strategy-only assistant.',
     countState,
     primaryAction: finalAction,
     fallbackAction,
