@@ -6,6 +6,7 @@ import CardPicker from '@/components/blackjack/CardPicker';
 import { InfoPanel } from '@/components/InfoPanel';
 import { ModeSelector } from '@/components/ModeSelector';
 import { evaluateHand } from '@/lib/blackjack/handEvaluator';
+import { calculateCountState } from '@/lib/blackjack/counting';
 import { BLACKJACK_MODE_MAP, BLACKJACK_MODES } from '@/lib/blackjack/modes';
 import type { CardRank } from '@/lib/blackjack/types';
 import { DEFAULT_MODE } from '@/lib/modes';
@@ -35,6 +36,12 @@ export default function HomePage() {
   const playerSoftHardLabel = playerCards.length === 0 ? '—' : playerHandValue.isSoft ? 'Soft' : 'Hard';
   const playerPairLabel = playerCards.length < 2 ? 'N/A (need 2 cards)' : playerHandValue.canSplit ? 'Pair' : 'Not a pair';
 
+  const countCards = useMemo(() => [...playerCards, ...dealerUpcard, ...exposedCards], [playerCards, dealerUpcard, exposedCards]);
+  const countState = useMemo(
+    () => calculateCountState(countCards, selectedModeConfig.rulesConfig.deckCount),
+    [countCards, selectedModeConfig.rulesConfig.deckCount]
+  );
+
   return (
     <AppShell
       title="Blackjack Assistant"
@@ -45,19 +52,20 @@ export default function HomePage() {
           selectedMode={selectedMode}
           modes={BLACKJACK_MODES}
           onModeChange={setSelectedMode}
-          helperText="Select a ruleset profile for assistant context. Strategy logic is intentionally placeholder-only."
+          helperText="Select a ruleset profile for assistant context. Strategy and deviation logic are intentionally placeholder-only."
         />
 
         <InfoPanel
           title="Count Info"
-          description="Placeholder panel for running count, true count, and decks remaining."
+          description="Live Hi-Lo count context from entered exposed cards."
         >
           <p className="text-sm text-slate-300">
             Current mode: <span className="font-medium text-slate-100">{selectedModeConfig.label}</span>
           </p>
-          <p className="mt-2 text-sm text-slate-400">Running count: —</p>
-          <p className="mt-1 text-sm text-slate-400">True count: —</p>
-          <p className="mt-1 text-xs text-slate-500">No counting engine is active in this shell yet.</p>
+          <p className="mt-2 text-sm text-slate-400">Running count: {countState.runningCount}</p>
+          <p className="mt-1 text-sm text-slate-400">Estimated decks remaining: {countState.decksRemaining}</p>
+          <p className="mt-1 text-sm text-slate-400">True count: {countState.trueCount}</p>
+          <p className="mt-1 text-xs text-slate-500">Based on exposed cards entered across player, dealer upcard, and seen cards.</p>
         </InfoPanel>
 
         <CardPicker
@@ -106,7 +114,7 @@ export default function HomePage() {
 
         <InfoPanel
           title="Seen Cards Panel"
-          description="Visible cards for counting context (input only; no counting engine yet)."
+          description="Visible cards for counting context input."
         >
           <p className="text-sm text-slate-300">
             Exposed cards entered: <span className="font-medium text-slate-100">{exposedCards.length}</span>
