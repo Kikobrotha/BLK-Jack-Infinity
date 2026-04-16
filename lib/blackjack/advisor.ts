@@ -63,7 +63,10 @@ export function getBlackjackAdvice(
         ? `${handType} ${handValue.total}`
         : handType;
   const upcardSummary = `${cardLabel(dealerUpcard)} (${dealerUpcard})`;
-  const rationale = `${ruleset.label}: ${handSummary} vs dealer ${upcardSummary}. Basic strategy recommends ${baseAction}. ${deviationDecision.explanation}`;
+  const deviationSummary = deviationDecision.deviationApplied
+    ? `Count deviation changed ${baseAction} to ${finalAction} at TC ${countState.trueCount}.`
+    : `No count deviation changed the play (TC ${countState.trueCount}), so keep ${finalAction}.`;
+  const rationale = `${ruleset.label}: ${handSummary} vs dealer ${upcardSummary}. ${deviationSummary}`;
 
   return {
     baseAction,

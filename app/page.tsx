@@ -105,8 +105,8 @@ export default function HomePage() {
     const advice = getBlackjackAdvice(selectedMode, playerCards, dealerUpcard[0], countCards);
     const mainAction: MainAction = advice.insurance.shouldOffer ? 'INSURANCE' : advice.finalAction.toUpperCase() as MainAction;
     const shortReason = advice.insurance.shouldOffer
-      ? 'Dealer shows Ace: insurance decision available (decline by default strategy).'
-      : advice.deviationExplanation;
+      ? `${advice.rationale} Insurance: decline by default without a dedicated insurance count.`
+      : advice.rationale;
 
     return {
       mainAction,
