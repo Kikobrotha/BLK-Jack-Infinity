@@ -25,11 +25,21 @@ export interface HandValue {
   canSplit: boolean;
 }
 
+export type StrategyHandType = 'hard' | 'soft' | 'pair' | 'blackjack' | 'bust';
+
+export interface InsuranceGuidance {
+  shouldOffer: boolean;
+  recommendation: 'NoInsurance';
+  rationale: string;
+}
+
 export interface Recommendation {
   primaryAction: ActionType;
   fallbackAction?: ActionType;
   rationale: string;
   handValue: HandValue;
+  handType: StrategyHandType;
+  insurance: InsuranceGuidance;
 }
 
 export interface CountState {
