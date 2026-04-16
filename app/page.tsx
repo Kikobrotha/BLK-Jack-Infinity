@@ -83,9 +83,7 @@ export default function HomePage() {
     const mainAction: MainAction = advice.insurance.shouldOffer ? 'INSURANCE' : advice.finalAction.toUpperCase() as MainAction;
     const shortReason = advice.insurance.shouldOffer
       ? 'Dealer shows Ace: insurance decision available (decline by default strategy).'
-      : advice.deviationApplied
-        ? 'Count deviation triggered: follow the adjusted action.'
-        : 'Basic strategy result for this hand and dealer upcard.';
+      : advice.deviationExplanation;
 
     return {
       mainAction,
