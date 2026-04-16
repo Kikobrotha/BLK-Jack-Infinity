@@ -55,14 +55,17 @@ export function getBlackjackAdvice(
   const handType = classifyHand(playerCards);
   const insurance = insuranceGuidance(dealerUpcard);
 
-  const softness = handValue.isSoft ? 'soft' : 'hard';
-  const rationale = `In ${ruleset.label}, with a ${softness} ${handValue.total} versus dealer ${cardLabel(
-    dealerUpcard,
-  )}, baseline basic strategy says ${baseAction}. ${
-    deviationDecision.deviationApplied
-      ? `Count deviation applies, so final action is ${finalAction}.`
-      : `No count deviation applies, so final action stays ${finalAction}.`
-  }`;
+  const handSummary =
+    handType === 'pair'
+      ? `pair ${playerCards[0]}-${playerCards[1]}`
+      : handType === 'soft' || handType === 'hard'
+        ? `${handType} ${handValue.total}`
+        : handType;
+  const upcardSummary = `${cardLabel(dealerUpcard)} (${dealerUpcard})`;
+  const deviationSummary = deviationDecision.deviationApplied
+    ? `Count deviation changed ${baseAction} to ${finalAction}.`
+    : `No count deviation change; keep ${finalAction}.`;
+  const rationale = `${ruleset.label}: ${handSummary} vs dealer ${upcardSummary}. Baseline suggests ${baseAction}. ${deviationSummary}`;
 
   return {
     baseAction,
